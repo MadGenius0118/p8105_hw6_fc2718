@@ -1,6 +1,6 @@
 ---
-title: "Homework 6 solutions"
-author: "Jeff Goldsmith"
+title: "Homework 6"
+author: "Fangyi"
 output: github_document
 ---
 
@@ -46,7 +46,8 @@ bootstrap_r_squared = weather_df |>
 ```{r}
 ggplot(aes(x = r.squared), data=bootstrap_r_squared) + geom_density()
 ```
-The computed $\hat{r}^2$ is high with an average of `r mean(boostrap_r_squared$r.squared)`, which reflects a significant proportion of the variability in the dependent variable `tmax` can be explained by the independent variables `tmin` and `prcp`. The min of the bootstrap values of $\hat{r}^2$ is `r min(boostrap_r_squared$r.squared)` and the max is `r max(boostrap_r_squared$r.squared)`
+
+The computed $\hat{r}^2$ is high with an average of `r mean(bootstrap_r_squared$r.squared)`, which reflects a significant proportion of the variability in the dependent variable `tmax` can be explained by the independent variables `tmin` and `prcp`. The min of the bootstrap values of $\hat{r}^2$ is `r min(bootstrap_r_squared$r.squared)` and the max is `r max(bootstrap_r_squared$r.squared)`
 
 #### 95% Confidence Interval of $\hat{r}^2$ values
 ```{r}
@@ -83,6 +84,7 @@ bootstrap_beta = weather_df |>
 ```{r plot_beta}
 ggplot(aes(x = log_beta1_beta2), data=bootstrap_beta) + geom_density()
 ```
+
 The distribution of $\log(\beta_1 * \beta2)$ values is highly skewed, with some outliers on the left side.
 
 #### 95% Confidence Interval of $\log(\beta_1 * \beta2)$  values
@@ -129,6 +131,7 @@ birthweight_df |>
     y = "Residuals",
     title = "Residuals against Fitted values") 
 ```
+
 ### Compare with other two models 
 ```{r}
 cv_df = 
