@@ -8,6 +8,8 @@ output: github_document
 ```{r, load_libraries, message = FALSE, warning=FALSE}
 library(tidyverse)
 library(ggridges)
+library(modelr)
+library(mgcv)
 ```
 
 
@@ -91,3 +93,83 @@ bootstrap_beta  |>
     ci_upper = quantile(log_beta1_beta2, 0.975, na.rm = TRUE))
 ```
 ## Problem 3
+```{r load_clean_data}
+birthweight_df =  read_csv("./data/birthweight.csv") |> 
+  janitor::clean_names() |> 
+  mutate(
+    babysex = factor(babysex, labels = c("male", "female")),
+    frace = factor(frace, labels = c("white","black","asian", "puerto rican", "other")),
+    malform = factor(malform, labels= c("absent", "present")),
+    mrace = factor(mrace, labels=c("white", "black", "asian", "puerto rican"))
+  ) 
+```
+
+```{r examine data}
+skimr::skim(birthweight_df)
+```
+### Construct my model
+```{r}
+my_model = lm(bwt~., data=birthweight_df) |> 
+  step(direction="both")
+```
+
+```{r}
+summary(my_model)
+```
+I leveraged stepwise model selection approach to construct the optimal model, where it iteractively adds or removes variables to find the best-fitting model. 
+
+```{r}
+birthweight_df |> 
+  modelr::add_residuals(my_model) |> 
+  modelr::add_predictions(my_model) |> 
+  ggplot(aes(x=pred, y=resid)) +
+  geom_point(alpha=0.5) +
+  labs( 
+    x= "Fitted Values", 
+    y = "Residuals",
+    title = "Residuals against Fitted values") 
+```
+### Compare with other two models 
+```{r}
+cv_df = 
+  crossv_mc(birthweight_df, 100) |> 
+  mutate(
+    train = map(train, as_tibble),
+    test = map(test, as_tibble)
+    ) |> 
+  mutate(
+    model_1 = map(train, \(df) lm(bwt ~blength + gaweeks, data=df)),
+    model_2 = map(train, \(df) lm(bwt ~bhead + blength + babysex + bhead*blength + 
+                                    bhead*babysex + blength*babysex + 
+                                    bhead*blength*babysex, data=df)),
+    my_model = map(train, \(df) lm(bwt ~ babysex + bhead + blength + delwt + fincome + 
+                                     gaweeks + mheight + mrace + parity + ppwt + 
+                                     smoken,data=df))
+    ) |> 
+  mutate(
+    rmse_model_1 =map2_dbl(model_1, test, \(mod, df) rmse(model = mod, data = df)),
+    rmse_model_2 =map2_dbl(model_2, test, \(mod, df) rmse(model = mod, data = df)),
+    rmse_my_model =map2_dbl(my_model, test, \(mod, df) rmse(model = mod, data = df))
+  )
+
+  
+```
+
+
+```{r}
+cv_df |> 
+  select(starts_with("rmse")) |> 
+  pivot_longer(
+    everything(),
+    names_to = "model", 
+    values_to = "rmse",
+    names_prefix = "rmse_") |> 
+  mutate(model = fct_inorder(model)) |> 
+  ggplot(aes(x = model, y = rmse)) + geom_violin() +
+  labs(
+    y= "rmse", 
+    x = "Models",
+    title = "Comparison of three models")
+
+```
+As perceived from the graph, `my_model` has the lowest rmse value overall, where lower the rmse score, the closer to the actual values.  `model_1` has the largest rmse value. To conclude, `my_model` performed the best among the three proposed models.
