@@ -175,4 +175,5 @@ cv_df |>
     title = "Comparison of three models")
 
 ```
+
 As perceived from the graph, `my_model` has the lowest rmse value overall, where lower the rmse score, the closer to the actual values.  `model_1` has the largest rmse value. To conclude, `my_model` performed the best among the three proposed models.
