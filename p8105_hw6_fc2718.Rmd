@@ -1,0 +1,12 @@
+---
+title: "Homework 6 solutions"
+author: "Jeff Goldsmith"
+output: github_document
+---
+
+
+```{r, load_libraries, message = FALSE, warning=FALSE}
+library(tidyverse)
+library(ggridges)
+```
+
