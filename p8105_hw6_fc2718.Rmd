@@ -78,15 +78,16 @@ bootstrap_beta = weather_df |>
 ```
 
 #### Plotting distribution of $\log(\beta_1 * \beta2)$ values
-```{r}
+```{r plot_beta}
 ggplot(aes(x = log_beta1_beta2), data=bootstrap_beta) + geom_density()
 ```
 The distribution of $\log(\beta_1 * \beta2)$ values is highly skewed, with some outliers on the left side.
 
-#### 95% Confidence Interval of $\hat{r}^2$ values
-```{r}
+#### 95% Confidence Interval of $\log(\beta_1 * \beta2)$  values
+```{r calc_beta_ci}
 bootstrap_beta  |> 
   summarize(
     ci_lower = quantile(log_beta1_beta2, 0.025, na.rm = TRUE), 
     ci_upper = quantile(log_beta1_beta2, 0.975, na.rm = TRUE))
 ```
+## Problem 3
